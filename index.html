@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0069)file:///C:/Users/gerar/Downloads/Case_Closing_Letter_Generator_5.html -->
+<!-- saved from url=(0069)file:///C:/Users/gerar/Downloads/Case_Closing_Letter_Generator_9.html -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <title>GM Closing Letter</title>
@@ -274,8 +274,11 @@
         </p>
 
         <p>Re: State of MN vs. <span class="bound empty" data-bind="client-re">[CLIENT]</span></p>
+        <p>&nbsp;</p>
+        <p>&nbsp;</p>
 
         <p>Dear <span class="bound empty" data-bind="client-greeting">[CLIENT]</span>,</p>
+        <p>&nbsp;</p>
 
         <p><strong>This letter will serve to close your file with our office.</strong></p>
 
@@ -327,10 +330,10 @@
 
 
         <!-- UNIVERSAL CLOSING PARAGRAPH (always shown, regardless of sections) -->
-        <p class="closing-paragraph">I appreciate the trust you put in me and my firm to be in your corner when handling your case. I know this whole process has been an anxiety filled adventure, but I hope we helped to make this portion of your journey as stress free as possible. If you have any questions about the conditions, just reach out and we can chat through the options in more detail. Please let me know if you have any questions moving forward.</p>
+        <div class="page-break-marker" contenteditable="false" style="height: 253.078px;"><div class="pb-gap" style="top: 129.078px; height: 28px;"></div></div><p class="closing-paragraph">I appreciate the trust you put in me and my firm to be in your corner when handling your case. I know this whole process has been an anxiety filled adventure, but I hope we helped to make this portion of your journey as stress free as possible. If you have any questions about the conditions, just reach out and we can chat through the options in more detail. Please let me know if you have any questions moving forward.</p>
 
         <!-- SIGNATURE -->
-        <div class="page-break-marker" contenteditable="false" style="height: 232.297px;"><div class="pb-gap" style="top: 108.297px; height: 28px;"></div></div><p class="signature-line">Very truly yours,</p>
+        <p class="signature-line">Very truly yours,</p>
         <p><strong>GERALD MILLER, P.A.</strong></p>
         <p class="sig-slash">/s/ <span class="bound" data-bind="attorney">Gerard W. Mannion</span></p>
         <p><span class="bound" data-bind="attorney">Gerard W. Mannion</span>, Esq.</p>
@@ -568,6 +571,24 @@
     } catch (e) { /* element may have been removed */ }
   }
 
+  function getBreakableElements() {
+    // Returns the flat list of elements pagination should consider as
+    // individual breakable units. Active section divs get expanded into
+    // their children so a long section can split across pages.
+    const result = [];
+    [...docContent.children].forEach(el => {
+      if (el.classList.contains('page-break-marker')) return;
+      if (el.tagName === 'DIV' && el.classList.contains('section')) {
+        if (getComputedStyle(el).display !== 'none') {
+          [...el.children].forEach(c => result.push(c));
+        }
+      } else {
+        result.push(el);
+      }
+    });
+    return result;
+  }
+
   function paginate() {
     const saved = saveSelection();
 
@@ -577,7 +598,7 @@
     const docRect = docContent.getBoundingClientRect();
     const docTop = docRect.top + window.scrollY + PADDING_TOP;
 
-    const children = [...docContent.children].filter(el => !el.classList.contains('page-break-marker'));
+    const children = getBreakableElements();
     if (!children.length) return;
 
     const breaks = [];
@@ -603,7 +624,7 @@
     for (let i = breaks.length - 1; i >= 0; i--) {
       const { beforeChild, fillHeight } = breaks[i];
       const marker = createMarker(fillHeight);
-      docContent.insertBefore(marker, beforeChild);
+      beforeChild.parentNode.insertBefore(marker, beforeChild);
     }
 
     const numPages = breaks.length + 1;
@@ -642,11 +663,11 @@
     document.querySelector(`[data-toggle="${L}"]`).addEventListener('change', () => syncSection(L));
   });
 
-  ['f_resolution_A','f_total_A','f_conditions_A','f_total_B','f_conditions_B','f_basis_C'].forEach(id => {
+  ['f_resolution_A','f_conditions_A','f_conditions_B','f_basis_C'].forEach(id => {
     if ($(id)) $(id).addEventListener('input', syncSectionFields);
   });
-  if ($('f_total_A')) $('f_total_A').addEventListener('blur', e => { formatMoney(e.target); syncSectionFields(); });
-  if ($('f_total_B')) $('f_total_B').addEventListener('blur', e => { formatMoney(e.target); syncSectionFields(); });
+  if ($('f_total_A')) $('f_total_A').addEventListener('input', e => { formatMoney(e.target); syncSectionFields(); });
+  if ($('f_total_B')) $('f_total_B').addEventListener('input', e => { formatMoney(e.target); syncSectionFields(); });
   if ($('f_trial_D')) $('f_trial_D').addEventListener('change', syncSectionFields);
 
   docContent.addEventListener('input', () => schedulePaginate());
